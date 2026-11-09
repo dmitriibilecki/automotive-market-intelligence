@@ -1,65 +1,91 @@
-# Automotive Market Intelligence
+# Automotive Market Intelligence — collect first, decide later
 
 [![Offline checks](https://github.com/dmitriibilecki/automotive-market-intelligence/actions/workflows/checks.yml/badge.svg)](https://github.com/dmitriibilecki/automotive-market-intelligence/actions/workflows/checks.yml)
 
-A Python pipeline for inspecting used-car asking prices: collect structured listing attributes, deduplicate records in SQLite, calculate peer medians and generate operational reports.
+**I wanted to choose a car for my family and understand what was actually available within reach.**
 
-The project grew from a personal need to compare vehicle listings consistently. This public edition includes the collection and reporting code plus an offline demonstration using entirely synthetic records. No original listings, seller details, photographs, browser sessions or private logs are redistributed.
+Browsing individual listings gave me fragments of the picture: a price here, a mileage figure there, another tab to remember. I built this project to collect that information in one place and make it easier to look through.
 
-![Offline market report using 240 synthetic records](docs/demo.png)
+It started with a personal question: what does the market offer, and where do my expectations fit?
 
-## Offline demo
+## Where the project is now
 
-Python 3.12 or newer. The demo uses only the standard library and never opens OLX.
+The current focus is **collecting and organizing listing data**. I have a local archive and review it manually: how many cars of a particular brand appear in the collected sample, what sellers are asking, and how the listings differ.
+
+I have not yet carried out a separate, systematic analysis of that archive. That will be a later stage of the project.
+
+The code already includes basic summaries, comparisons and reports. These are building blocks for exploring the data, rather than a finished market study or a validated car-buying recommendation.
+
+## What the pipeline collects
+
+- Vehicle make, model and year.
+- Asking price and mileage.
+- Available attributes such as fuel type and transmission.
+- Listing identifiers and observation timestamps.
+
+The pipeline parses and normalizes the records, stores them in SQLite, updates repeated observations and exports reports for inspection.
+
+```mermaid
+flowchart LR
+  A[Vehicle listings] --> B[Parse and normalize]
+  B --> C[SQLite archive]
+  C --> D[Basic summaries and exports]
+  D --> E[Manual review]
+```
+
+The public code also demonstrates comparisons between similar listings and simple rules for a manual-review shortlist. A low asking price is a reason to investigate, not a buying recommendation.
+
+## Where I want to take it
+
+The next stages are separate from the current collection work:
+
+1. **Explore the archive:** check coverage, missing fields and useful comparisons in a dedicated analysis or dashboard.
+2. **Make comparisons more useful:** account for the details that make two cars genuinely comparable, and expand collection coverage where practical.
+3. **Support a purchase decision:** combine a family's needs and budget with the available evidence to help decide which cars to inspect, which to skip and what still needs checking.
+
+The goal is to support a better-informed decision about a family car. It is not an automatic buy-or-don't-buy system today.
+
+## Try the public example
+
+![Example report using 240 fictional vehicle records](docs/demo.png)
+
+The screenshot uses generated data. To create the example on your own computer:
+
+1. Download the repository using **Code → Download ZIP** and extract it.
+2. Install Python 3.12 or newer if needed.
+3. Open a terminal in the extracted folder and run:
 
 ```sh
 python demo.py
 ```
 
-Open `output/market.html`. The run also produces a reproducible SQLite database, `output/brand_summary.csv` for Tableau and a JSON summary. All public demo values are synthetic and are labeled accordingly.
+4. Open `output/market.html` in your browser.
 
-## Public edition and private data
+The demo runs locally without opening a listing website or connecting to my computer. It creates 240 fictional vehicle records, a SQLite database, a CSV export and a summary report. These numbers do not describe the real market.
 
-This is a separate public snapshot. The original observation archive, all real-data aggregates, seller information, photographs, browser profiles and local settings remain outside this repository. Only generated demo data and fictional test fixtures are included.
+## Public code, private archive
 
-`export_aggregates.py` documents an optional local transformation for a database supplied by its owner; no real database or export is bundled. [Tableau dashboard brief](docs/TABLEAU_BRIEF.md) describes the synthetic demonstration.
+This repository contains the collection and reporting code, documentation and fictional examples. My original archive, real-data aggregates, seller information, photographs, browser sessions and local settings remain private.
 
-To run the existing parser, storage and report checks:
+`export_aggregates.py` provides an optional transformation for a locally supplied database. No real database or export is bundled. The [Tableau brief](docs/TABLEAU_BRIEF.md) describes a dashboard based on the synthetic demo.
+
+## Development and checks
+
+To run the parser, storage and reporting checks:
 
 ```sh
 python -m pip install -r requirements.txt
 python -m unittest discover -s checks -p "check*.py" -v
 ```
 
-Local release validation: all 13 parser, storage and report checks passed, including the conservative absence-tracking guard. The offline demo completed with 240 synthetic records. The GitHub Actions workflow runs the offline checks and demo on every push and pull request.
+All 13 checks passed for the public release. GitHub Actions runs the checks and demo on each push and pull request.
 
-## What the code demonstrates
+For a separately configured live run, `main.py` retains the collector. Install Playwright's browser and check the source site's permitted access before running it. The offline demo and tests need no live collection.
 
-- Structured parsing with a field allowlist.
-- Idempotent updates: preserve first-seen time while updating last-seen time.
-- SQLite storage and brand-level summaries.
-- Peer groups based on brand, model and year.
-- Transparent rules for prioritizing listings for manual inspection.
-- Explicit missing values, collection limits and blocking detection.
+## How to read the data
 
-```mermaid
-flowchart LR
-  A[Listing observations] --> B[Parse and normalize]
-  B --> C[SQLite upsert]
-  C --> D[Peer-group statistics]
-  D --> E[Manual-review shortlist]
-  C --> F[Excel and aggregate exports]
-```
+Asking prices are not transaction prices. Simple peer comparisons do not fully account for condition, trim, engine, accident history or seller behavior. Small groups may be unreliable; the current peer-price heuristic does not enforce a minimum group size.
 
-## Read the metrics correctly
+Collection defaults target Warsaw and produce a limited sample, not a representative view of the Polish market. A brand appearing often in this archive does not establish its market share.
 
-Asking prices are not transaction prices. Peer medians do not control for condition, trim, engine, accident history or seller behavior. Small peer groups can produce unreliable comparisons; the current heuristic does not enforce a minimum group size. The score is a rule-based shortlist aid, not a trained valuation or fraud model.
-
-`first_seen_at` measures this collector's observation time, not the listing's publication date. A missing listing does not prove a sale. In this public edition, `mark_missing_inactive` is disabled unless a caller explicitly supplies `complete_snapshot=True` and guarantees full database coverage. The inherited capped collector does not make that guarantee, so it no longer marks unseen records inactive. Active flags consequently do not measure current inventory. A production upgrade should scope absence tracking by search and successful crawl coverage.
-
-The collector's convenience defaults target Warsaw. This is a convenience sample, not a representative estimate of the Polish car market. No price trends, sales conversion or model accuracy are claimed by this release.
-
-## Live collection
-
-The inherited `main.py` remains available for a separately configured live run. Install Playwright's browser first if needed. Check the site's current terms and permitted access before running collection. The demo and automated checks do not require a live site. Never commit the generated raw database or scraped content.
-
+`first_seen_at` means the collector's first observation, not the listing's publication date. A missing listing does not prove a sale. Absence tracking requires an explicit full-coverage snapshot; the capped collector does not provide one, so active flags do not establish current inventory.
