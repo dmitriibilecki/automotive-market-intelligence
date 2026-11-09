@@ -63,6 +63,3 @@ The collector's convenience defaults target Warsaw. This is a convenience sample
 
 The inherited `main.py` remains available for a separately configured live run. Install Playwright's browser first if needed. Check the site's current terms and permitted access before running collection. The demo and automated checks do not require a live site. Never commit the generated raw database or scraped content.
 
-## Authorship
-
-Developed by Dmitrii Bilecki with AI coding assistance. Product framing, data assumptions and limitations are documented so the implementation can be inspected and discussed.
