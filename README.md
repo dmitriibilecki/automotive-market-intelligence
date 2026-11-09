@@ -1,5 +1,7 @@
 # Automotive Market Intelligence
 
+[![Offline checks](https://github.com/dmitriibilecki/automotive-market-intelligence/actions/workflows/checks.yml/badge.svg)](https://github.com/dmitriibilecki/automotive-market-intelligence/actions/workflows/checks.yml)
+
 A Python pipeline for inspecting used-car asking prices: collect structured listing attributes, deduplicate records in SQLite, calculate peer medians and generate operational reports.
 
 The project grew from a personal need to compare vehicle listings consistently. This public edition includes the collection and reporting code plus an offline demonstration using entirely synthetic records. No original listings, seller details, photographs, browser sessions or private logs are redistributed.
@@ -29,7 +31,7 @@ python -m pip install -r requirements.txt
 python -m unittest discover -s checks -p "check*.py" -v
 ```
 
-Local release validation: all 13 parser, storage and report checks passed, including the conservative absence-tracking guard. The offline demo completed with 240 synthetic records. The included CI workflow has not yet run on GitHub.
+Local release validation: all 13 parser, storage and report checks passed, including the conservative absence-tracking guard. The offline demo completed with 240 synthetic records. The GitHub Actions workflow runs the offline checks and demo on every push and pull request.
 
 ## What the code demonstrates
 
