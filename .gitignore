@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env*
+data/
+car_bot/data/
+output/
+*.sqlite*
+*.xlsx
+*.log
+*.html
+!docs/*.html
